@@ -59,7 +59,7 @@ uint8_t SupmeaDO7016::begin(Stream &port,
 }
 
 /**
- * @brief Convert ModBus two 16bits float notation to IEEE784 float point.
+ * @brief Convert ModBus two 16bits float notation to IEEE754 float point.
  * 
  * @param low low portion of the float.
  * @param high high portion of the float.
