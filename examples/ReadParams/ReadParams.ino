@@ -35,7 +35,7 @@ void postTransmission(){
     digitalWrite(MAX485_RE_DE, 0);
 }
 
-SupmeaDO7016 SupProbe(Serial2, preTransmission, postTransmission);
+SupmeaDO7016 SupProbe;
 
 void setup(){   
     uint8_t ret;
@@ -45,7 +45,7 @@ void setup(){
     pinMode(MAX485_RE_DE, OUTPUT);
 
     /* Must call begin before first probe use. */
-    ret = SupProbe.begin();
+    ret = SupProbe.begin(Serial2, preTransmission, postTransmission);
     if(ret){
         Serial.print("ModBus error code ");        
         Serial.println(ret);

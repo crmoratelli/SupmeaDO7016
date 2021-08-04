@@ -13,39 +13,44 @@
 
 /**
  * @brief Class Constructor.
- *  @param port Must be a HardwareSerial port.
- *  @param pre a function pointer to a routine to configure the RS485 to pre-transmissiton.
- *  @param pos a function pointer to a routine to configure the RS485 to pos-transmissiton.
  */
-SupmeaDO7016::SupmeaDO7016(Stream &port, void (*preT)(), void (*posT)()): probePort(port){
+SupmeaDO7016::SupmeaDO7016(){
     measurement_time = 0;
-
-    /* Callbacks to configure the RS485 transceiver correctly */
-    probe.preTransmission(preT);
-    probe.postTransmission(posT);
 }
 
 /**
  * @brief Probe initilization. Must be called before use.
+ * @param port Must be a HardwareSerial port.
+ * @param preT a function pointer to a routine to configure the RS485 to pre-transmissiton.
+ * @param posT a function pointer to a routine to configure the RS485 to pos-transmissiton.
  * @param probe_addr ModBus probe address. Default probe address is 10.
  * @param serial_speed Serial port speed. Default probe speed is 9600 bps.
  * @param serial_conf Serial port configuration. Default probe configuration is SERIAL_8N2.
  * @return 0 if the probe is found otherwise ModBus error.
  */
-uint8_t SupmeaDO7016::begin(uint8_t probe_addr = 10, uint16_t serial_speed = 9600, uint16_t serial_conf = SERIAL_8N2){
+uint8_t SupmeaDO7016::begin(Stream &port, 
+                            void (*preT)(), 
+                            void (*posT)(), 
+                            uint8_t probe_addr = 10, 
+                            uint16_t serial_speed = 9600, 
+                            uint16_t serial_conf = SERIAL_8N2){
     uint8_t busret;
 
-    static_cast<HardwareSerial*>(&probePort)->begin(serial_speed, serial_conf);
+    static_cast<HardwareSerial*>(&port)->begin(serial_speed, serial_conf);
 
-    /* Initiate modbus communication */
-    probe.begin(probe_addr, probePort);
+    /* Callbacks to configure the RS485 transceiver correctly */
+    probe.preTransmission(preT);
+    probe.postTransmission(posT);
+
+    /* Init modbus communication */
+    probe.begin(probe_addr, port);
 
     /** Read the DO7016 waiting time.
     *    It will be used for further communicatons.
     */
     busret = probe.readHoldingRegisters(MODBUS_ADDR_TIME_TAKEN, 1);
     if (busret == probe.ku8MBSuccess){
-        measurement_time = probe.getResponseBuffer(0);
+        measurement_time = probe.getResponseBuffer(0) + 10;
     }
 
     ndelay.setdelay(measurement_time);

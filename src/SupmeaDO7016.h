@@ -48,7 +48,6 @@ enum {
 
 class SupmeaDO7016 {
     private:
-        Stream &probePort;
         ModbusMaster probe;
         noDelay ndelay;
         uint16_t measurement_time;
@@ -61,8 +60,8 @@ class SupmeaDO7016 {
         * 
         * TODO: Implement more functionalities as calibration routines. 
         * */
-        SupmeaDO7016(Stream &port, void (*preT)(), void (*posT)());
-        uint8_t begin(uint8_t probe_addr = 10, uint16_t serial_speed = 9600, uint16_t serial_conf = SERIAL_8N2);
+        SupmeaDO7016();
+        uint8_t begin(Stream &port, void (*preT)(), void (*posT)(), uint8_t probe_addr = 10, uint16_t serial_speed = 9600, uint16_t serial_conf = SERIAL_8N2);
         uint8_t startMeasurement(uint8_t param = MEASUREMENT_ALL);
         bool isMeasurementDone();
         uint8_t getAllParams(float &temp, float &sat, float &mgl, float &ppm);
