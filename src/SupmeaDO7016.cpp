@@ -185,9 +185,6 @@ uint8_t SupmeaDO7016::send_frame_170(uint16_t addr, float std_X){
 
     delay(CONFTIME);
 
-    Serial.println(high, HEX);
-    Serial.println(low, HEX);
-
     probe.setTransmitBuffer(0, high);
     probe.setTransmitBuffer(1, low);
     return probe.writeMultipleRegisters(addr, 2);
