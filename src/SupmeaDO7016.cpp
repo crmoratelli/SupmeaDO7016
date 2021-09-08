@@ -34,9 +34,10 @@ uint8_t SupmeaDO7016::begin(Stream &port,
     uint8_t probe_addr = 10, 
     uint16_t serial_speed = 9600, 
     uint16_t serial_conf = SERIAL_8N2){
-    uint8_t busret;
+    uint8_t busret;   
 
     static_cast<HardwareSerial*>(&port)->begin(serial_speed, serial_conf);
+    while(!static_cast<HardwareSerial*>(&port));
 
     /* Callbacks to configure the RS485 transceiver correctly */
     probe.preTransmission(preT);
@@ -91,13 +92,27 @@ bool SupmeaDO7016::isMeasurementDone(){
  * @return 0 if success otherwise modbus error code.
  */
 uint8_t SupmeaDO7016::getAllParams(float &temp, float &sat, float &mgl, float &ppm){
-    uint8_t busret = probe.readHoldingRegisters(MODBUS_ADDR_TEMPERATURE, 8);
-
+    uint8_t busret = probe.readHoldingRegisters(MODBUS_ADDR_TEMPERATURE, 2);
     if (busret == probe.ku8MBSuccess){
         temp = modbus_to_float(probe.getResponseBuffer(1), probe.getResponseBuffer(0));
-        sat = modbus_to_float(probe.getResponseBuffer(3), probe.getResponseBuffer(2));
-        mgl = modbus_to_float(probe.getResponseBuffer(5), probe.getResponseBuffer(4));
-        ppm = modbus_to_float(probe.getResponseBuffer(7), probe.getResponseBuffer(6));
+    }
+    delay(10);
+
+    busret = probe.readHoldingRegisters(MODBUS_ADDR_TEMPERATURE+2, 2);
+    if (busret == probe.ku8MBSuccess){
+        sat = modbus_to_float(probe.getResponseBuffer(1), probe.getResponseBuffer(0));
+    }
+    delay(10);
+
+    busret = probe.readHoldingRegisters(MODBUS_ADDR_TEMPERATURE+4, 2);
+    if (busret == probe.ku8MBSuccess){
+        mgl = modbus_to_float(probe.getResponseBuffer(1), probe.getResponseBuffer(0));
+    }
+    delay(10);
+
+    busret = probe.readHoldingRegisters(MODBUS_ADDR_TEMPERATURE+6, 2);
+    if (busret == probe.ku8MBSuccess){
+        ppm = modbus_to_float(probe.getResponseBuffer(1), probe.getResponseBuffer(0));
     }
 
     return busret;
